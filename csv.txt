@@ -1,0 +1,9 @@
+C:\Users\Rafael\Documents\Servicio Social\Interfaz\BD_Rostros\persona1\1.png;0
+C:\Users\Rafael\Documents\Servicio Social\Interfaz\BD_Rostros\persona1\2.png;0
+C:\Users\Rafael\Documents\Servicio Social\Interfaz\BD_Rostros\persona1\3.png;0
+C:\Users\Rafael\Documents\Servicio Social\Interfaz\BD_Rostros\persona2\1.png;1
+C:\Users\Rafael\Documents\Servicio Social\Interfaz\BD_Rostros\persona2\2.png;1
+C:\Users\Rafael\Documents\Servicio Social\Interfaz\BD_Rostros\persona2\3.png;1
+C:\Users\Rafael\Documents\Servicio Social\Interfaz\BD_Rostros\persona3\1.png;2
+C:\Users\Rafael\Documents\Servicio Social\Interfaz\BD_Rostros\persona3\2.png;2
+C:\Users\Rafael\Documents\Servicio Social\Interfaz\BD_Rostros\persona3\3.png;2
