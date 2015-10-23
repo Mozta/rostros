@@ -16,9 +16,7 @@ import cv2
 
 # Variables globales
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
-face_bd = "csv.txt"
-labels = [1,2,3]
-imagesBD = []
+
 img = ""
 crop_img = []
 cont_i = 0
@@ -124,20 +122,14 @@ class Ui_CipherImageForm(object):
 
         #Guardamos las mini imagenes
         for x in crop_img:
-            cv2.imwrite(self.parseo(unicode(imageName))+'_'+str(cont_i)+'.png',self.redimensionar_imagen(crop_img[cont_i]))
+            cv2.imwrite(self.parseo(unicode(imageName)).rstrip(".png")+'_'+str(cont_i)+'.png',self.redimensionar_imagen(crop_img[cont_i]))
             cont_i += 1
 
     def redimensionar_imagen(self, image):
         resized_image = cv2.resize(image, (300, 300)) 
         return resized_image
 
-    def leer_csv(self, filename, imagesBD, labels):
-        archi=open(filename,'r')
-        linea=archi.readline()
-        while linea!="":
-            imagesBD.append(linea)
-            linea=archi.readline()
-        archi.close()
+
 
     def encapsular(self):
         # Sobre escribimos la imagen
@@ -158,15 +150,7 @@ class Ui_CipherImageForm(object):
         global img
         global cont_i
         global crop_img
-        global face_bd
-        global imagesBD
-        global labels
 
-        self.leer_csv(face_bd, imagesBD, labels);
-        im_width = 300 #Columnas
-        im_height = 300 #Renglones
-        model = cv2.createEigenFaceRecognizer()
-        model.train(imagesBD, np.array(labels))
 
         #convertimos la imagen a blanco y negro
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
