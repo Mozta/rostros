@@ -11,8 +11,11 @@ from PyQt4 import QtCore, QtGui
 
 # Import para la detección
 import copy
-import numpy as np
+import numpy
 import cv2
+import pprint
+import random
+import math
 
 # Variables globales
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
@@ -20,6 +23,8 @@ face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
 img = ""
 crop_img = []
 cont_i = 0
+
+route = training_data = testing_data = data_dict = model = ""
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -69,6 +74,12 @@ class Ui_CipherImageForm(object):
         self.saveImageButton.setText(_translate("CipherImageForm", "Guardar Imagen", None))
 
     def abrir_imagen(self):
+        global route
+        global training_data
+        global testing_data
+        global data_dict
+        global model
+
         # Limpiamos las vistas de imagenes
         if self.rawImageView.scene() != None:
             self.rawImageView.scene().clear()
@@ -101,6 +112,19 @@ class Ui_CipherImageForm(object):
         # Asignamos la imagen temporal a la imagen de trabajo
         self.rawImage = image
         self.cipherImage = image
+
+        #Pasar a otra partes DESPUES
+        training_data = self.prepara_entrenamiento_y_testing(self.leer_csv())
+        data_dict = self.crea_etiquetas_matriz_dict(training_data)
+        model = self.crea_y_entrena_modelo(data_dict) 
+
+        #Guardamos el modelo
+        print "Modelo guardado"
+        model.save('modelo_eigenfaces.yml')
+
+        #Abrimos el modelo
+        #print "Modelo cargado"
+        #model.load('modelo_eigenfaces.yml')
 
     def guardar_imagen(self):
         global img
@@ -150,7 +174,12 @@ class Ui_CipherImageForm(object):
         global img
         global cont_i
         global crop_img
+        global route
 
+        global training_data
+        global testing_data
+        global data_dict
+        global model
 
         #convertimos la imagen a blanco y negro
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
@@ -161,9 +190,19 @@ class Ui_CipherImageForm(object):
         print faces
         #Dibujamos un rectangulo en las coordenadas de cada rostro
         for (x,y,w,h) in faces:
+            texto = "Sujeto: "
             cv2.rectangle(img,(x,y),(x+w,y+h),(125,255,0),2)
+
+            prediccion = self.predice_imagen(model, self.redimensionar_imagen(gray[y:y+h,x:x+w]))
             #crop_img = img[x:y,x+w:y+h]
-            crop_img.append(img[y:y+h,x:x+w])
+            crop_img.append(gray[y:y+h,x:x+w])
+
+            # calcular la posicion para el texto anotado:
+            pos_x = max(x - 10, 0);
+            pos_y = max(y - 10, 0);
+            # Y ahora poner en la imagen:
+            cv2.putText(img,texto+str(prediccion[0]), (pos_x,pos_y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,0,255),2,cv2.CV_AA)
+            #cv2.putText(img,'OpenCV',(10,500), font, 4,(255,255,255),2,cv2.LINE_AA)
 
         #Abrimos el archivo contador
         archi=open('C:\Users\Rafael\Documents\Servicio Social\Tracking\contador.txt','r')
@@ -199,6 +238,60 @@ class Ui_CipherImageForm(object):
         cv2.cvtColor(cvImage, cv2.COLOR_BGR2RGB, cvImage)
 
         return QtGui.QImage(cvImage, width, height, byteValue, QtGui.QImage.Format_RGB888)
+
+    '''
+    *********************** Funciones para eigenFaces ***********************
+    '''
+    def crea_y_entrena_modelo(self,label_matrix):
+        #Crea el modelo Eigenface de dict de etiquetas e imagenes
+        model = cv2.createEigenFaceRecognizer(3,2500.0)
+        model.train(label_matrix.values(), numpy.array(label_matrix.keys()))
+        return model
+
+    def predice_imagen(self,model, image):
+        #Dado un modelo Eigenface, predice la etiqueta de una imagen
+        return model.predict(image)
+
+    def leer_csv(self,rutaBD='faces.csv'):
+        #Leer archivo csv
+        csv = open("faces.csv", 'r')
+
+        return csv
+
+    def prepara_entrenamiento_y_testing(self,file):
+        #Prepara las pruebas y entrenamiento de datos del archivo
+        lines = file.readlines()
+        training_data = self.split_test_training_data(lines)
+        return training_data
+
+    def crea_etiquetas_matriz_dict(self,input_file):
+        #Crea dict de etiqueta -> matrices de archivo
+
+        #   Para cada linea, si existe key, insertar en dict, else adjuntar
+        label_dict = {}
+
+        for line in input_file:
+            ## split ';' en el csv separando nombre de archivo;etiqueta
+            filename, label = line.strip().split(';')
+
+            ## Actualiza el key actual si este existe, else anadir
+            if label_dict.has_key(int(label)):
+                current_files = label_dict.get(label)
+                numpy.append(current_files,self.leer_matrix_from_file(filename))
+            else:
+                label_dict[int(label)] = self.leer_matrix_from_file(filename)
+
+        return label_dict 
+
+    def split_test_training_data(self,data, ratio=0.2):
+        #Dividir una lista de archivos de imagen por el ratio del entrenamiento
+        test_size = int(math.floor(ratio*len(data)))
+        random.shuffle(data)
+        return data[test_size:]
+
+    def leer_matrix_from_file(self,filename):
+        #leer en escala de grises la imagen de archivo
+        return cv2.imread(filename, cv2.CV_LOAD_IMAGE_GRAYSCALE)
 
 
 if __name__ == "__main__":
