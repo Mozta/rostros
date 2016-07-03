@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# Autor: Rafael Pérez Aguirre
+
 # Form implementation generated from reading ui file 'main.ui'
 #
 # Created: Sun Sep 23 22:10:20 2015
@@ -95,7 +97,7 @@ class Ui_CipherImageForm(object):
         # Abrimos la imagen para mostrar
         image = QtGui.QImage(imageName)
         # Cargamos la plantilla
-        
+
         # Abrimos la imagen con opencv
         global img
         img = cv2.imread(route)
@@ -106,7 +108,7 @@ class Ui_CipherImageForm(object):
         self.rawImageView.setScene(scene)
         # Adaptamos el tamaño de la imagen
         self.rawImageView.fitInView(item)
-        
+
         scene.addItem(item)
 
         # Asignamos la imagen temporal a la imagen de trabajo
@@ -116,7 +118,7 @@ class Ui_CipherImageForm(object):
         #Pasar a otra partes DESPUES
         training_data = self.prepara_entrenamiento_y_testing(self.leer_csv())
         data_dict = self.crea_etiquetas_matriz_dict(training_data)
-        model = self.crea_y_entrena_modelo(data_dict) 
+        model = self.crea_y_entrena_modelo(data_dict)
 
         #Guardamos el modelo
         print "Modelo guardado"
@@ -150,7 +152,7 @@ class Ui_CipherImageForm(object):
             cont_i += 1
 
     def redimensionar_imagen(self, image):
-        resized_image = cv2.resize(image, (300, 300)) 
+        resized_image = cv2.resize(image, (300, 300))
         return resized_image
 
 
@@ -161,7 +163,7 @@ class Ui_CipherImageForm(object):
         item = QtGui.QGraphicsPixmapItem(QtGui.QPixmap.fromImage(self.cipherImage))
         self.rawImageView.setScene(scene)
         self.rawImageView.fitInView(item)
-        
+
         scene.addItem(item)
         print "Encapsulado finalizado"
 
@@ -182,7 +184,7 @@ class Ui_CipherImageForm(object):
         global model
 
         #convertimos la imagen a blanco y negro
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         #buscamos las coordenadas de los rostros  y
         #guardamos su posicion
@@ -201,20 +203,20 @@ class Ui_CipherImageForm(object):
             pos_x = max(x - 10, 0);
             pos_y = max(y - 10, 0);
             # Y ahora poner en la imagen:
-            cv2.putText(img,texto+str(prediccion[0]), (pos_x,pos_y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,0,255),2,cv2.CV_AA)
+            cv2.putText(img,texto+str(prediccion[0]), (pos_x,pos_y), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,0,255),5,cv2.CV_AA)
             #cv2.putText(img,'OpenCV',(10,500), font, 4,(255,255,255),2,cv2.LINE_AA)
 
-        #Abrimos el archivo contador
-        archi=open('C:\Users\Rafael\Documents\Servicio Social\Tracking\contador.txt','r')
+        #Abrimos el archivo contador        
+        archi=open('C:\Users\Mozta\Documents\Servicio Social\Interfaz\contador.txt','r')
         c=int(archi.readline())
         archi.close()
-        archi=open('C:\Users\Rafael\Documents\Servicio Social\Tracking\contador.txt','w')
+        archi=open('C:\Users\Mozta\Documents\Servicio Social\Interfaz\contador.txt','w')
         c+=1
         archi.write(str(c))
         archi.close()
 
         #Guardamos la imagen por default
-        cv2.imwrite('C:\Users\Rafael\Documents\Servicio Social\Tracking\FotosProcesadas\img'+str(c)+'.jpg',img)
+        cv2.imwrite('C:\Users\Mozta\Documents\Servicio Social\Interfaz\FotosProcesadas\img'+str(c)+'.jpg',img)
         cv2.destroyAllWindows()
 
         # Sobre escribimos la imagen
@@ -222,7 +224,7 @@ class Ui_CipherImageForm(object):
         item = QtGui.QGraphicsPixmapItem(QtGui.QPixmap.fromImage(self.cvImgToQtImg(img)))
         self.rawImageView.setScene(scene)
         self.rawImageView.fitInView(item)
-        
+
         scene.addItem(item)
         print "Deteccion finalizada"
 
@@ -244,7 +246,7 @@ class Ui_CipherImageForm(object):
     '''
     def crea_y_entrena_modelo(self,label_matrix):
         #Crea el modelo Eigenface de dict de etiquetas e imagenes
-        model = cv2.createEigenFaceRecognizer(3,2500.0)
+        model = cv2.createEigenFaceRecognizer(80,2500.0)
         model.train(label_matrix.values(), numpy.array(label_matrix.keys()))
         return model
 
@@ -281,7 +283,7 @@ class Ui_CipherImageForm(object):
             else:
                 label_dict[int(label)] = self.leer_matrix_from_file(filename)
 
-        return label_dict 
+        return label_dict
 
     def split_test_training_data(self,data, ratio=0.2):
         #Dividir una lista de archivos de imagen por el ratio del entrenamiento
