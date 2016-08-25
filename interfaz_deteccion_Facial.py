@@ -115,7 +115,7 @@ class Ui_CipherImageForm(object):
         self.rawImage = image
         self.cipherImage = image
 
-        #Pasar a otra partes DESPUES
+        #TODO: Pasar a otra partes DESPUES
         training_data = self.prepara_entrenamiento_y_testing(self.leer_csv())
         data_dict = self.crea_etiquetas_matriz_dict(training_data)
         model = self.crea_y_entrena_modelo(data_dict)
@@ -150,6 +150,8 @@ class Ui_CipherImageForm(object):
         for x in crop_img:
             cv2.imwrite(self.parseo(unicode(imageName)).rstrip(".png")+'_'+str(cont_i)+'.png',self.redimensionar_imagen(crop_img[cont_i]))
             cont_i += 1
+
+        print "Imagenes guardadas satisfactoriamente"
 
     def redimensionar_imagen(self, image):
         resized_image = cv2.resize(image, (300, 300))
@@ -205,8 +207,9 @@ class Ui_CipherImageForm(object):
             # Y ahora poner en la imagen:
             cv2.putText(img,texto+str(prediccion[0]), (pos_x,pos_y), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,0,255),5,cv2.CV_AA)
             #cv2.putText(img,'OpenCV',(10,500), font, 4,(255,255,255),2,cv2.LINE_AA)
+            print prediccion[0]
 
-        #Abrimos el archivo contador        
+        #Abrimos el archivo contador
         archi=open('C:\Users\Mozta\Documents\Servicio Social\Interfaz\contador.txt','r')
         c=int(archi.readline())
         archi.close()
@@ -242,11 +245,13 @@ class Ui_CipherImageForm(object):
         return QtGui.QImage(cvImage, width, height, byteValue, QtGui.QImage.Format_RGB888)
 
     '''
-    *********************** Funciones para eigenFaces ***********************
+    *********************** Funciones para eigenFaces, fisherFaces y LBPHF ***********************
     '''
     def crea_y_entrena_modelo(self,label_matrix):
         #Crea el modelo Eigenface de dict de etiquetas e imagenes
         model = cv2.createEigenFaceRecognizer(80,2500.0)
+        #model = cv2.createFisherFaceRecognizer(-2,2500.0)
+        #model = cv2.createLBPHFaceRecognizer(2, 8, 8, 8, 120.0)
         model.train(label_matrix.values(), numpy.array(label_matrix.keys()))
         return model
 
